@@ -18,6 +18,18 @@ pub fn start() {
 
     for line in io::stdin().lock().lines() {
         let source = line.unwrap();
+
+        if source == "#clear" {
+            clear!();
+            print!("> ");
+            std::io::stdout().flush().unwrap();
+            continue;
+        }
+
+        if source == "#exit" {
+            break;
+        }
+
         let (syntax, syntax_errors) = parse(&source);
 
         if syntax_errors.len() > 0 {
