@@ -9,20 +9,28 @@ use crate::interpreter::value::*;
 use crate::interpreter::*;
 use crate::syntax::*;
 
+fn flush(c: Box<dyn Fn()>) {
+    c();
+    std::io::stdout().flush().unwrap();
+}
+
+fn clear() {
+    flush(box || {
+        clear!();
+        print!("> ");
+    });
+}
+
 pub fn start() {
     let mut interpreter = Interpreter::new();
 
-    clear!();
-    print!("> ");
-    std::io::stdout().flush().unwrap();
+    clear();
 
     for line in io::stdin().lock().lines() {
         let source = line.unwrap();
 
         if source == "#clear" {
-            clear!();
-            print!("> ");
-            std::io::stdout().flush().unwrap();
+            clear();
             continue;
         }
 
@@ -33,9 +41,9 @@ pub fn start() {
         let (syntax, syntax_errors) = parse(&source);
 
         if syntax_errors.len() > 0 {
-            print!("{:?}", syntax_errors[0]);
-            print!("\n> ");
-            std::io::stdout().flush().unwrap();
+            flush(box move || {
+                print!("{:?}\n>", syntax_errors[0]);
+            });
             continue;
         }
 
@@ -44,9 +52,9 @@ pub fn start() {
 
         let type_errors = interpreter.flush_errors();
         if type_errors.len() > 0 {
-            print!("{:?}", type_errors[0]);
-            print!("\n> ");
-            std::io::stdout().flush().unwrap();
+            flush(box move || {
+                print!("{:?}\n>", type_errors[0]);
+            });
             continue;
         }
 
@@ -59,7 +67,8 @@ pub fn start() {
             }
         }
 
-        print!("> ");
-        std::io::stdout().flush().unwrap();
+        flush(box || {
+            print!("> ");
+        });
     }
 }
