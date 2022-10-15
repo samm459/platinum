@@ -14,6 +14,7 @@ pub enum Error {
     UnexpectedType(Range<usize>, Type, Type),
     Reassignment(Range<usize>, String),
     UnexpectedToken(Range<usize>, Token, Token),
+    BadCall(Range<usize>),
 }
 
 #[derive(Debug)]
@@ -69,6 +70,12 @@ impl Debug for Error {
                 Category::Syntax,
                 range.clone(),
                 format!("Unexpected token {:?}, expected {:?}", recieved, expected),
+            ),
+            Self::BadCall(range) => Error::log(
+                f,
+                Category::Type,
+                range.clone(),
+                String::from("Cannot call a non-closure value"),
             ),
         }
     }
