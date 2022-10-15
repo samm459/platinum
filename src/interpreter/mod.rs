@@ -140,7 +140,7 @@ impl Interpreter {
             Syntax::Closure(closure) => {
                 let param = self.lookup(scope, closure.r#type).unwrap().clone();
                 let r#return = self.bind(*closure.expression, scope);
-                Type::Closure(Box::new(param), Box::new(r#return))
+                Type::Closure(box param, box r#return)
             }
         }
     }
