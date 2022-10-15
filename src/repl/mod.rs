@@ -51,7 +51,7 @@ impl Repl {
 
             if syntax_errors.len() > 0 {
                 Repl::flush(box move || {
-                    print!("{:?}\n>", syntax_errors[0]);
+                    print!("{:?}\n> ", syntax_errors[0]);
                 });
                 continue;
             }
@@ -62,7 +62,7 @@ impl Repl {
             let type_errors = self.interpreter.flush_errors();
             if type_errors.len() > 0 {
                 Repl::flush(box move || {
-                    print!("{:?}\n>", type_errors[0]);
+                    print!("{:?}\n> ", type_errors[0]);
                 });
                 continue;
             }
