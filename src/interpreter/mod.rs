@@ -149,7 +149,7 @@ impl Interpreter {
         match syntax {
             Syntax::Name(name) => self.get(scope, name.0).unwrap().clone(),
             Syntax::Literal(literal) => match literal.0 .0 {
-                Token::String => Value::String(self.source(literal.0)),
+                Token::String => Value::String(inner_string(self.source(literal.0))),
                 Token::Number => Value::Number(self.source(literal.0).parse::<usize>().unwrap()),
                 Token::Boolean => Value::Boolean(self.source(literal.0).parse::<bool>().unwrap()),
                 Token::None => Value::None,
@@ -158,14 +158,12 @@ impl Interpreter {
             Syntax::Closure(closure) => {
                 let name = closure.name.clone();
                 let expression = closure.expression.clone();
-
                 let closure = move |value: Value, interpreter: &mut Interpreter| {
                     let mut scope = Scope::new(scope);
                     scope.map.insert(interpreter.source(name), value);
                     interpreter.chain.push(scope);
                     interpreter.eval(*expression.clone(), interpreter.chain.len() - 1)
                 };
-
                 Value::Closure(Arc::new(closure))
             }
             Syntax::Call(call) => {

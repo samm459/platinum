@@ -2,15 +2,16 @@ mod library;
 mod module;
 
 use self::library::*;
-use self::module::*;
+use vec as core;
 
-pub fn build() -> Vec<Module> {
-    vec![
+pub fn build() -> CoreLibrary {
+    core![
         inc::define(),
         dec::define(),
         add::define(),
         sub::define(),
         mul::define(),
         div::define(),
+        cat::define(),
     ]
 }

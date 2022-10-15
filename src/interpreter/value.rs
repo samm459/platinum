@@ -58,7 +58,7 @@ impl Debug for Value {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
             Value::Number(usize) => write!(f, "{}{}{}", YELLOW, usize, RESET),
-            Value::String(string) => write!(f, "{}{}{}", GREEN, string, RESET),
+            Value::String(string) => write!(f, "{}\"{}\"{}", GREEN, string, RESET),
             Value::Boolean(bool) => write!(f, "{}{}{}", CYAN, bool, RESET),
             Value::Closure(_) => write!(f, "{}[Closure]{}", MAGENTA, RESET),
             Value::None => write!(f, "{}[None]{}", MAGENTA, RESET),
@@ -80,4 +80,8 @@ impl PartialEq for Value {
             },
         }
     }
+}
+
+pub fn inner_string(string: String) -> String {
+    String::from(&string[1..string.len() - 1])
 }
