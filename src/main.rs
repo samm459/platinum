@@ -6,6 +6,8 @@ pub mod interpreter;
 pub mod repl;
 pub mod syntax;
 
+use repl::Repl;
+
 fn main() {
-    repl::start();
+    Repl::start();
 }

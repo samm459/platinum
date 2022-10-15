@@ -9,66 +9,81 @@ use crate::interpreter::value::*;
 use crate::interpreter::*;
 use crate::syntax::*;
 
-fn flush(c: Box<dyn Fn()>) {
-    c();
-    std::io::stdout().flush().unwrap();
+pub struct Repl {
+    interpreter: Interpreter,
 }
 
-fn clear() {
-    flush(box || {
-        clear!();
-        print!("> ");
-    });
-}
+impl Repl {
+    fn flush(c: Box<dyn Fn()>) {
+        c();
+        std::io::stdout().flush().unwrap();
+    }
 
-pub fn start() {
-    let mut interpreter = Interpreter::new();
-
-    clear();
-
-    for line in io::stdin().lock().lines() {
-        let source = line.unwrap();
-
-        if source == "#clear" {
-            clear();
-            continue;
-        }
-
-        if source == "#exit" {
-            break;
-        }
-
-        let (syntax, syntax_errors) = parse(&source);
-
-        if syntax_errors.len() > 0 {
-            flush(box move || {
-                print!("{:?}\n>", syntax_errors[0]);
-            });
-            continue;
-        }
-
-        interpreter.set_source(&source);
-        interpreter.bind(syntax.clone(), 0);
-
-        let type_errors = interpreter.flush_errors();
-        if type_errors.len() > 0 {
-            flush(box move || {
-                print!("{:?}\n>", type_errors[0]);
-            });
-            continue;
-        }
-
-        let value = interpreter.eval(syntax.clone(), 0);
-
-        match value {
-            Value::None => {}
-            _ => {
-                print!("{:?}\n", value);
-            }
-        }
-
-        flush(box || {
+    fn clear() {
+        Repl::flush(box || {
+            clear!();
             print!("> ");
         });
+    }
+
+    fn new() -> Repl {
+        Repl {
+            interpreter: Interpreter::new(),
+        }
+    }
+
+    pub fn r#loop(&mut self) {
+        Repl::clear();
+
+        for line in io::stdin().lock().lines() {
+            let source = line.unwrap();
+
+            if source == "#clear" {
+                Repl::clear();
+                continue;
+            }
+
+            if source == "#exit" {
+                break;
+            }
+
+            let (syntax, syntax_errors) = parse(&source);
+
+            if syntax_errors.len() > 0 {
+                Repl::flush(box move || {
+                    print!("{:?}\n>", syntax_errors[0]);
+                });
+                continue;
+            }
+
+            self.interpreter.set_source(&source);
+            self.interpreter.bind(syntax.clone(), 0);
+
+            let type_errors = self.interpreter.flush_errors();
+            if type_errors.len() > 0 {
+                Repl::flush(box move || {
+                    print!("{:?}\n>", type_errors[0]);
+                });
+                continue;
+            }
+
+            let value = self.interpreter.eval(syntax.clone(), 0);
+
+            match value {
+                Value::None => {}
+                _ => {
+                    print!("{:?}\n", value);
+                }
+            }
+
+            Repl::flush(box || {
+                print!("> ");
+            });
+        }
+    }
+
+    pub fn start() {
+        let mut repl = Repl::new();
+        repl.r#loop();
     }
 }
