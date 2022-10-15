@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-use std::sync::Arc;
-
 use super::*;
+use crate::core;
+use std::collections::HashMap;
 
 pub type Map<T> = HashMap<String, T>;
 
@@ -13,32 +12,15 @@ pub struct Scope {
 
 impl Scope {
     pub fn global() -> Scope {
+        let core = core::build();
+
         let mut type_map = HashMap::new();
         let mut map = HashMap::new();
 
-        type_map.insert(
-            "inc".into(),
-            Type::Closure(Box::new(Type::Number), Box::new(Type::Number)),
-        );
-
-        type_map.insert(
-            "dec".into(),
-            Type::Closure(Box::new(Type::Number), Box::new(Type::Number)),
-        );
-
-        map.insert(
-            "inc".into(),
-            Value::Closure(Arc::new(|value: Value, _: &mut Interpreter| {
-                Value::Number(value.unwrap_number() + 1)
-            })),
-        );
-
-        map.insert(
-            "dec".into(),
-            Value::Closure(Arc::new(|value: Value, _: &mut Interpreter| {
-                Value::Number(value.unwrap_number() - 1)
-            })),
-        );
+        for module in core {
+            type_map.insert(module.name.clone(), module.r#type);
+            map.insert(module.name, module.value);
+        }
 
         Scope {
             parent: None,
