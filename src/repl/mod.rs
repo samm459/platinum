@@ -1,20 +1,18 @@
+pub mod clear;
 pub mod escape_code;
 
 use std::io;
 use std::io::prelude::*;
 
+use crate::clear;
 use crate::interpreter::value::*;
 use crate::interpreter::*;
 use crate::syntax::*;
 
-pub fn clear() {
-    print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-}
-
 pub fn start() {
     let mut chain = Interpreter::new();
 
-    clear();
+    clear!();
     print!("> ");
     std::io::stdout().flush().unwrap();
 
