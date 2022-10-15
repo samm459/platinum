@@ -7,11 +7,8 @@ use crate::{
 
 pub fn define() -> Module {
     let r#type = Type::Closure(
-        Box::new(Type::String),
-        Box::new(Type::Closure(
-            Box::new(Type::String),
-            Box::new(Type::String),
-        )),
+        box Type::String,
+        box Type::Closure(box Type::String, box Type::String),
     );
 
     let value = Value::Closure(Arc::new(|value1: Value, _: &mut Interpreter| {
