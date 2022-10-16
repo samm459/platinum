@@ -1,6 +1,11 @@
 use std::sync::Arc;
 
-use crate::interpreter::{r#type::Type, scope::Scope, value::Value, Interpreter};
+use crate::interpreter::{
+    r#type::Type,
+    scope::{Scope, ScopeIndex},
+    value::Value,
+    Interpreter,
+};
 
 use super::{Branch, Leaf, Syntax, Token};
 
@@ -24,13 +29,13 @@ impl ClosureSyntax {
         }
     }
 
-    pub fn bind(&self, interpreter: &mut Interpreter, scope: usize) -> Type {
+    pub fn bind(&self, interpreter: &mut Interpreter, scope: ScopeIndex) -> Type {
         let param = interpreter.lookup(scope, self.r#type).unwrap().clone();
         let r#return = interpreter.bind(*self.expression.clone(), scope);
         Type::Closure(box param, box r#return)
     }
 
-    pub fn eval(&self, scope: usize) -> Value {
+    pub fn eval(&self, scope: ScopeIndex) -> Value {
         let name = self.name.clone();
         let expression = self.expression.clone();
 

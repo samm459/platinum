@@ -26,11 +26,11 @@ impl Interpreter {
         }
     }
 
-    fn type_map(&mut self, scope: usize) -> &mut Map<Type> {
+    fn type_map(&mut self, scope: ScopeIndex) -> &mut Map<Type> {
         &mut self.chain[scope].type_map
     }
 
-    pub fn map(&mut self, scope: usize) -> &mut Map<Value> {
+    pub fn map(&mut self, scope: ScopeIndex) -> &mut Map<Value> {
         &mut self.chain[scope].map
     }
 
@@ -56,12 +56,12 @@ impl Interpreter {
         errors
     }
 
-    pub fn declare(&mut self, scope: usize, node: Node, r#type: Type) {
+    pub fn declare(&mut self, scope: ScopeIndex, node: Node, r#type: Type) {
         let source = self.source(node);
         self.type_map(scope).insert(source, r#type);
     }
 
-    pub fn lookup(&mut self, scope: usize, node: Node) -> Option<Type> {
+    pub fn lookup(&mut self, scope: ScopeIndex, node: Node) -> Option<Type> {
         let parent = self.chain.get(scope).unwrap().parent;
         let source = self.source(node);
         let type_option: Option<Type> = match self.type_map(scope).get(&source) {
@@ -78,7 +78,7 @@ impl Interpreter {
         }
     }
 
-    pub fn get(&mut self, scope: usize, node: Node) -> Option<Value> {
+    pub fn get(&mut self, scope: ScopeIndex, node: Node) -> Option<Value> {
         let parent = self.chain.get(scope).unwrap().parent;
         let source = self.source(node);
         let value_option = match self.map(scope).get(&source) {
@@ -95,7 +95,7 @@ impl Interpreter {
         }
     }
 
-    pub fn bind(&mut self, syntax: Syntax, scope: usize) -> Type {
+    pub fn bind(&mut self, syntax: Syntax, scope: ScopeIndex) -> Type {
         match syntax {
             Syntax::Assignment(assignment) => assignment.bind(self, scope),
             Syntax::Call(call) => call.bind(self, scope),
@@ -105,7 +105,7 @@ impl Interpreter {
         }
     }
 
-    pub fn eval(&mut self, syntax: Syntax, scope: usize) -> Value {
+    pub fn eval(&mut self, syntax: Syntax, scope: ScopeIndex) -> Value {
         match syntax {
             Syntax::Name(name) => name.eval(self, scope),
             Syntax::Literal(literal) => literal.eval(self),

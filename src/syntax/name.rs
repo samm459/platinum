@@ -1,6 +1,6 @@
 use crate::{
     error::Error,
-    interpreter::{r#type::Type, value::Value, Interpreter},
+    interpreter::{r#type::Type, scope::ScopeIndex, value::Value, Interpreter},
 };
 
 use super::Leaf;
@@ -9,7 +9,7 @@ use super::Leaf;
 pub struct NameSyntax(pub Leaf);
 
 impl NameSyntax {
-    pub fn bind(&self, interpreter: &mut Interpreter, scope: usize) -> Type {
+    pub fn bind(&self, interpreter: &mut Interpreter, scope: ScopeIndex) -> Type {
         match interpreter.lookup(scope, self.0) {
             Some(value) => value.clone(),
             None => {
@@ -22,7 +22,7 @@ impl NameSyntax {
         }
     }
 
-    pub fn eval(&self, interpreter: &mut Interpreter, scope: usize) -> Value {
+    pub fn eval(&self, interpreter: &mut Interpreter, scope: ScopeIndex) -> Value {
         interpreter.get(scope, self.0).unwrap().clone()
     }
 }

@@ -1,7 +1,7 @@
 use super::{Branch, Leaf, Parser, Syntax, Token};
 use crate::{
     error::Error,
-    interpreter::{r#type::Type, value::Value, *},
+    interpreter::{r#type::Type, scope::ScopeIndex, value::Value, *},
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -20,7 +20,7 @@ impl AssignmentSyntax {
         }
     }
 
-    pub fn bind(&self, interpreter: &mut Interpreter, scope: usize) -> Type {
+    pub fn bind(&self, interpreter: &mut Interpreter, scope: ScopeIndex) -> Type {
         let expression_type = interpreter.bind(*self.expression.clone(), scope);
 
         if let Some(_) = interpreter.lookup(scope, self.name) {
@@ -35,7 +35,7 @@ impl AssignmentSyntax {
         Type::None
     }
 
-    pub fn eval(&self, interpreter: &mut Interpreter, scope: usize) -> Value {
+    pub fn eval(&self, interpreter: &mut Interpreter, scope: ScopeIndex) -> Value {
         let name = String::from(interpreter.source(self.name));
         let value = interpreter.eval(*self.expression.clone(), scope);
         interpreter.map(scope).insert(name, value);

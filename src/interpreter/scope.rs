@@ -5,7 +5,7 @@ use std::collections::HashMap;
 pub type Map<T> = HashMap<String, T>;
 
 pub struct Scope {
-    pub parent: Option<usize>,
+    pub parent: Option<ScopeIndex>,
     pub map: Map<Value>,
     pub type_map: Map<Type>,
 }
@@ -29,7 +29,7 @@ impl Scope {
         }
     }
 
-    pub fn new(parent: usize) -> Scope {
+    pub fn new(parent: ScopeIndex) -> Scope {
         Scope {
             parent: Some(parent),
             type_map: HashMap::new(),
@@ -37,3 +37,5 @@ impl Scope {
         }
     }
 }
+
+pub type ScopeIndex = usize;

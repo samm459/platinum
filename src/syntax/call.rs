@@ -1,6 +1,6 @@
 use crate::{
     error::Error,
-    interpreter::{r#type::Type, value::Value, Interpreter},
+    interpreter::{r#type::Type, scope::ScopeIndex, value::Value, Interpreter},
 };
 
 use super::{Branch, Parser, Syntax, Token};
@@ -20,7 +20,7 @@ impl CallSyntax {
         left
     }
 
-    pub fn bind(&self, interpreter: &mut Interpreter, scope: usize) -> Type {
+    pub fn bind(&self, interpreter: &mut Interpreter, scope: ScopeIndex) -> Type {
         let left = interpreter.bind(*self.0.clone(), scope);
         let right = interpreter.bind(*self.1.clone(), scope);
 
@@ -35,7 +35,7 @@ impl CallSyntax {
         }
     }
 
-    pub fn eval(&self, interpreter: &mut Interpreter, scope: usize) -> Value {
+    pub fn eval(&self, interpreter: &mut Interpreter, scope: ScopeIndex) -> Value {
         let left = interpreter.eval(*self.0.clone(), scope).unwrap_closure();
         let right = interpreter.eval(*self.1.clone(), scope);
         left(right, interpreter)
