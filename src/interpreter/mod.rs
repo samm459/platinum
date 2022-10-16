@@ -35,15 +35,15 @@ impl Interpreter {
         &mut self.chain[scope].map
     }
 
-    fn error(&mut self, error: Error) {
+    pub fn error(&mut self, error: Error) {
         self.errors.push(error)
     }
 
-    fn source(&self, node: Node) -> String {
+    pub fn source(&self, node: Node) -> String {
         String::from(&self.source[node.1.position..node.1.position + node.1.length])
     }
 
-    fn range(&self, node: Node) -> Range<usize> {
+    pub fn range(&self, node: Node) -> Range<usize> {
         node.1.position..node.1.position + node.1.length
     }
 
@@ -57,12 +57,12 @@ impl Interpreter {
         errors
     }
 
-    fn declare(&mut self, scope: usize, node: Node, r#type: Type) {
+    pub fn declare(&mut self, scope: usize, node: Node, r#type: Type) {
         let source = self.source(node);
         self.type_map(scope).insert(source, r#type);
     }
 
-    fn lookup(&mut self, scope: usize, node: Node) -> Option<Type> {
+    pub fn lookup(&mut self, scope: usize, node: Node) -> Option<Type> {
         let parent = self.chain.get(scope).unwrap().parent;
         let source = self.source(node);
         let type_option: Option<Type> = match self.type_map(scope).get(&source) {
@@ -98,50 +98,11 @@ impl Interpreter {
 
     pub fn bind(&mut self, syntax: Syntax, scope: usize) -> Type {
         match syntax {
-            Syntax::Assignment(assignment) => {
-                let expression_type = self.bind(*assignment.expression, scope);
-                if let Some(_) = self.lookup(scope, assignment.name) {
-                    self.error(Error::Reassignment(
-                        self.range(assignment.name),
-                        self.source(assignment.name),
-                    ))
-                } else {
-                    self.declare(scope, assignment.name, expression_type);
-                }
-                Type::None
-            }
-            Syntax::Call(call) => {
-                let left = self.bind(*call.0, scope);
-                let right = self.bind(*call.1, scope);
-                if let Type::Closure(param, r#return) = left {
-                    if right != *param {
-                        self.error(Error::UnexpectedType(0..0, *param, right));
-                    }
-                    *r#return
-                } else {
-                    self.error(Error::BadCall(0..0));
-                    Type::None
-                }
-            }
-            Syntax::Name(name) => match self.lookup(scope, name.0) {
-                Some(value) => value.clone(),
-                None => {
-                    self.error(Error::UnknownName(self.range(name.0), self.source(name.0)));
-                    Type::None
-                }
-            },
-            Syntax::Literal(literal) => match literal.0 .0 {
-                Token::String => Type::String,
-                Token::Number => Type::Number,
-                Token::Boolean => Type::Boolean,
-                Token::None => Type::None,
-                _ => panic!(),
-            },
-            Syntax::Closure(closure) => {
-                let param = self.lookup(scope, closure.r#type).unwrap().clone();
-                let r#return = self.bind(*closure.expression, scope);
-                Type::Closure(box param, box r#return)
-            }
+            Syntax::Assignment(assignment) => assignment.bind(self, scope),
+            Syntax::Call(call) => call.bind(self, scope),
+            Syntax::Name(name) => name.bind(self, scope),
+            Syntax::Literal(literal) => literal.bind(),
+            Syntax::Closure(closure) => closure.bind(self, scope),
         }
     }
 

@@ -1,3 +1,8 @@
+use crate::{
+    error::Error,
+    interpreter::{r#type::Type, Interpreter},
+};
+
 use super::{Branch, Parser, Syntax, Token};
 
 #[derive(Debug, PartialEq, Clone)]
@@ -13,5 +18,20 @@ impl CallSyntax {
         }
 
         left
+    }
+
+    pub fn bind(&self, interpreter: &mut Interpreter, scope: usize) -> Type {
+        let left = interpreter.bind(*self.0.clone(), scope);
+        let right = interpreter.bind(*self.1.clone(), scope);
+
+        if let Type::Closure(param, r#return) = left {
+            if right != *param {
+                interpreter.error(Error::UnexpectedType(0..0, *param, right));
+            }
+            *r#return
+        } else {
+            interpreter.error(Error::BadCall(0..0));
+            Type::None
+        }
     }
 }

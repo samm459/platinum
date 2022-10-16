@@ -1,3 +1,5 @@
+use crate::interpreter::{r#type::Type, Interpreter};
+
 use super::{Branch, Leaf, Syntax, Token};
 
 #[derive(Debug, PartialEq, Clone)]
@@ -18,5 +20,11 @@ impl ClosureSyntax {
             r#type: parser.expect(Token::Identifier),
             expression: Box::new(Syntax::parse(parser)),
         }
+    }
+
+    pub fn bind(&self, interpreter: &mut Interpreter, scope: usize) -> Type {
+        let param = interpreter.lookup(scope, self.r#type).unwrap().clone();
+        let r#return = interpreter.bind(*self.expression.clone(), scope);
+        Type::Closure(box param, box r#return)
     }
 }
