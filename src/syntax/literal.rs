@@ -1,5 +1,4 @@
 use crate::interpreter::{
-    self,
     r#type::Type,
     value::{inner_string, Value},
     Interpreter,
