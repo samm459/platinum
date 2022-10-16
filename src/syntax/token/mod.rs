@@ -38,8 +38,10 @@ pub fn register_tokens(lexer: &mut Lexer) {
     lexer.register(Token::none);
 }
 
-pub fn tokenize(source: &str) -> Lexer {
+pub fn tokenize(source: &str, start: usize) -> Lexer {
     let mut lexer = Lexer::new(source);
+
+    lexer.position = start;
 
     while lexer.current() != character::TERMINATOR {
         lexer.next_token()

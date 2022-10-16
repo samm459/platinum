@@ -26,6 +26,10 @@ impl Interpreter {
         }
     }
 
+    fn type_definition_map(&mut self, scope: ScopeIndex) -> &mut Map<Type> {
+        &mut self.chain[scope].type_definition_map
+    }
+
     fn type_map(&mut self, scope: ScopeIndex) -> &mut Map<Type> {
         &mut self.chain[scope].type_map
     }
@@ -78,6 +82,23 @@ impl Interpreter {
         }
     }
 
+    pub fn lookup_type_definition(&mut self, scope: ScopeIndex, node: Node) -> Option<Type> {
+        let parent = self.chain.get(scope).unwrap().parent;
+        let source = self.source(node);
+        let type_option: Option<Type> = match self.type_definition_map(scope).get(&source) {
+            Some(r#type) => Some(r#type.clone()),
+            None => None,
+        };
+
+        match type_option {
+            Some(r#type) => Some(r#type),
+            None => match parent {
+                Some(parent) => self.lookup_type_definition(parent, node),
+                None => None,
+            },
+        }
+    }
+
     pub fn get(&mut self, scope: ScopeIndex, node: Node) -> Option<Value> {
         let parent = self.chain.get(scope).unwrap().parent;
         let source = self.source(node);
@@ -102,6 +123,7 @@ impl Interpreter {
             Syntax::Name(name) => name.bind(self, scope),
             Syntax::Literal(literal) => literal.bind(),
             Syntax::Closure(closure) => closure.bind(self, scope),
+            Syntax::TypeExpression(type_expression) => type_expression.bind(self, scope),
         }
     }
 
@@ -109,9 +131,10 @@ impl Interpreter {
         match syntax {
             Syntax::Name(name) => name.eval(self, scope),
             Syntax::Literal(literal) => literal.eval(self),
-            Syntax::Closure(closure) => closure.eval(scope),
+            Syntax::Closure(closure) => closure.eval(self, scope),
             Syntax::Call(call) => call.eval(self, scope),
             Syntax::Assignment(assignment) => assignment.eval(self, scope),
+            Syntax::TypeExpression(_) => Value::None,
         }
     }
 }

@@ -1,4 +1,4 @@
-use super::{Branch, Leaf, Parser, Syntax, Token};
+use super::{Branch, Leaf, Parser, Syntax, Token, TypeExpressionSyntax};
 use crate::{
     error::Error,
     interpreter::{r#type::Type, scope::ScopeIndex, value::Value, *},
@@ -7,14 +7,31 @@ use crate::{
 #[derive(Debug, PartialEq, Clone)]
 pub struct AssignmentSyntax {
     pub name: Leaf,
+    pub type_expression: Option<TypeExpressionSyntax>,
     pub equals: Leaf,
     pub expression: Branch,
+}
+
+impl AssignmentSyntax {
+    pub fn parse_with_type(
+        name: Leaf,
+        type_expression: TypeExpressionSyntax,
+        parser: &mut Parser,
+    ) -> AssignmentSyntax {
+        AssignmentSyntax {
+            name,
+            type_expression: Some(type_expression),
+            equals: parser.expect(Token::Equals),
+            expression: Box::new(Syntax::parse(parser)),
+        }
+    }
 }
 
 impl AssignmentSyntax {
     pub fn parse(parser: &mut Parser) -> AssignmentSyntax {
         AssignmentSyntax {
             name: parser.expect(Token::Identifier),
+            type_expression: None,
             equals: parser.assert(Token::Equals),
             expression: Box::new(Syntax::parse(parser)),
         }

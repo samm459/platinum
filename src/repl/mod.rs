@@ -35,8 +35,12 @@ impl Repl {
     pub fn r#loop(&mut self) {
         Repl::clear();
 
+        let mut source = String::new();
+        let mut position = 0;
+
         for line in io::stdin().lock().lines() {
-            let source = line.unwrap();
+            let line = line.unwrap();
+            source += &line;
 
             if source == "#clear" {
                 Repl::clear();
@@ -47,12 +51,13 @@ impl Repl {
                 break;
             }
 
-            let (syntax, syntax_errors) = parse(&source);
+            let (syntax, syntax_errors) = parse(&source, position);
 
             if syntax_errors.len() > 0 {
                 Repl::flush(box move || {
                     print!("{:?}\n> ", syntax_errors[0]);
                 });
+                position += line.len();
                 continue;
             }
 
@@ -64,6 +69,7 @@ impl Repl {
                 Repl::flush(box move || {
                     print!("{:?}\n> ", type_errors[0]);
                 });
+                position += line.len();
                 continue;
             }
 
@@ -75,6 +81,8 @@ impl Repl {
                     print!("{:?}\n", value);
                 }
             }
+
+            position += line.len();
 
             Repl::flush(box || {
                 print!("> ");

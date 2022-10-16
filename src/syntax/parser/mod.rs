@@ -9,8 +9,8 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn new(source: &str) -> Parser {
-        let lexer = tokenize(source);
+    pub fn new(source: &str, start: usize) -> Parser {
+        let lexer = tokenize(source, start);
         let errors = lexer.errors.clone();
         Parser {
             position: 0,
@@ -92,8 +92,8 @@ impl Parser {
     }
 }
 
-pub fn parse(source: &str) -> (Syntax, Vec<Error>) {
-    let mut parser = Parser::new(source);
+pub fn parse(source: &str, start: usize) -> (Syntax, Vec<Error>) {
+    let mut parser = Parser::new(source, start);
     let syntax = Syntax::parse(&mut parser);
     (syntax, parser.errors)
 }
