@@ -19,6 +19,20 @@ pub struct ClosureSyntax {
 }
 
 impl ClosureSyntax {
+    fn create_closure(&self, scope: ScopeIndex) -> Box<dyn Fn(Value, &mut Interpreter) -> Value> {
+        let expression = self.expression.clone();
+        let name = self.name.clone();
+
+        box move |value: Value, interpreter: &mut Interpreter| {
+            let mut scope = Scope::new(scope);
+            scope.map.insert(interpreter.source(name), value);
+            interpreter.chain.push(scope);
+            interpreter.eval(*expression.clone(), interpreter.chain.len() - 1)
+        }
+    }
+}
+
+impl ClosureSyntax {
     pub fn parse(parser: &mut super::Parser) -> Self {
         ClosureSyntax {
             name: parser.expect(Token::Identifier),
@@ -36,16 +50,6 @@ impl ClosureSyntax {
     }
 
     pub fn eval(&self, scope: ScopeIndex) -> Value {
-        let name = self.name.clone();
-        let expression = self.expression.clone();
-
-        let closure = move |value: Value, interpreter: &mut Interpreter| {
-            let mut scope = Scope::new(scope);
-            scope.map.insert(interpreter.source(name), value);
-            interpreter.chain.push(scope);
-            interpreter.eval(*expression.clone(), interpreter.chain.len() - 1)
-        };
-
-        Value::Closure(Arc::new(closure))
+        Value::Closure(Arc::new(self.create_closure(scope)))
     }
 }
