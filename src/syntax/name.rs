@@ -3,7 +3,7 @@ use crate::{
     interpreter::{r#type::Type, scope::ScopeIndex, value::Value, Interpreter},
 };
 
-use super::Leaf;
+use super::{Leaf, Node};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct NameSyntax(pub Leaf);
@@ -16,17 +16,21 @@ impl NameSyntax {
         ));
         Type::None
     }
+
+    fn node(&self) -> Node {
+        self.0
+    }
 }
 
 impl NameSyntax {
     pub fn bind(&self, interpreter: &mut Interpreter, scope: ScopeIndex) -> Type {
-        match interpreter.lookup(scope, self.0) {
+        match interpreter.lookup(scope, self.node()) {
             Some(value) => value.clone(),
             None => self.unknown_name_error(interpreter),
         }
     }
 
     pub fn eval(&self, interpreter: &mut Interpreter, scope: ScopeIndex) -> Value {
-        interpreter.get(scope, self.0).unwrap().clone()
+        interpreter.get(scope, self.node()).unwrap().clone()
     }
 }
