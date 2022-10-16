@@ -1,7 +1,7 @@
 use super::{Branch, Leaf, Parser, Syntax, Token};
 use crate::{
     error::Error,
-    interpreter::{r#type::Type, *},
+    interpreter::{r#type::Type, value::Value, *},
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -33,5 +33,12 @@ impl AssignmentSyntax {
         }
 
         Type::None
+    }
+
+    pub fn eval(&self, interpreter: &mut Interpreter, scope: usize) -> Value {
+        let name = String::from(interpreter.source(self.name));
+        let value = interpreter.eval(*self.expression.clone(), scope);
+        interpreter.map(scope).insert(name, value);
+        Value::None
     }
 }

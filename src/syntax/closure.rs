@@ -1,4 +1,6 @@
-use crate::interpreter::{r#type::Type, Interpreter};
+use std::sync::Arc;
+
+use crate::interpreter::{r#type::Type, scope::Scope, value::Value, Interpreter};
 
 use super::{Branch, Leaf, Syntax, Token};
 
@@ -26,5 +28,19 @@ impl ClosureSyntax {
         let param = interpreter.lookup(scope, self.r#type).unwrap().clone();
         let r#return = interpreter.bind(*self.expression.clone(), scope);
         Type::Closure(box param, box r#return)
+    }
+
+    pub fn eval(&self, scope: usize) -> Value {
+        let name = self.name.clone();
+        let expression = self.expression.clone();
+
+        let closure = move |value: Value, interpreter: &mut Interpreter| {
+            let mut scope = Scope::new(scope);
+            scope.map.insert(interpreter.source(name), value);
+            interpreter.chain.push(scope);
+            interpreter.eval(*expression.clone(), interpreter.chain.len() - 1)
+        };
+
+        Value::Closure(Arc::new(closure))
     }
 }

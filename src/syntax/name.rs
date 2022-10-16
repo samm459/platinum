@@ -1,6 +1,6 @@
 use crate::{
     error::Error,
-    interpreter::{r#type::Type, Interpreter},
+    interpreter::{r#type::Type, value::Value, Interpreter},
 };
 
 use super::Leaf;
@@ -20,5 +20,9 @@ impl NameSyntax {
                 Type::None
             }
         }
+    }
+
+    pub fn eval(&self, interpreter: &mut Interpreter, scope: usize) -> Value {
+        interpreter.get(scope, self.0).unwrap().clone()
     }
 }

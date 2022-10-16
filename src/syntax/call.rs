@@ -1,6 +1,6 @@
 use crate::{
     error::Error,
-    interpreter::{r#type::Type, Interpreter},
+    interpreter::{r#type::Type, value::Value, Interpreter},
 };
 
 use super::{Branch, Parser, Syntax, Token};
@@ -33,5 +33,11 @@ impl CallSyntax {
             interpreter.error(Error::BadCall(0..0));
             Type::None
         }
+    }
+
+    pub fn eval(&self, interpreter: &mut Interpreter, scope: usize) -> Value {
+        let left = interpreter.eval(*self.0.clone(), scope).unwrap_closure();
+        let right = interpreter.eval(*self.1.clone(), scope);
+        left(right, interpreter)
     }
 }

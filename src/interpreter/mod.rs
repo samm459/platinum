@@ -10,12 +10,11 @@ use crate::error::*;
 use crate::syntax::*;
 
 use std::ops::Range;
-use std::sync::Arc;
 
 pub struct Interpreter {
     source: String,
-    chain: Vec<Scope>,
-    errors: Vec<Error>,
+    pub chain: Vec<Scope>,
+    pub errors: Vec<Error>,
 }
 
 impl Interpreter {
@@ -31,7 +30,7 @@ impl Interpreter {
         &mut self.chain[scope].type_map
     }
 
-    fn map(&mut self, scope: usize) -> &mut Map<Value> {
+    pub fn map(&mut self, scope: usize) -> &mut Map<Value> {
         &mut self.chain[scope].map
     }
 
@@ -79,7 +78,7 @@ impl Interpreter {
         }
     }
 
-    fn get(&mut self, scope: usize, node: Node) -> Option<Value> {
+    pub fn get(&mut self, scope: usize, node: Node) -> Option<Value> {
         let parent = self.chain.get(scope).unwrap().parent;
         let source = self.source(node);
         let value_option = match self.map(scope).get(&source) {
@@ -108,36 +107,11 @@ impl Interpreter {
 
     pub fn eval(&mut self, syntax: Syntax, scope: usize) -> Value {
         match syntax {
-            Syntax::Name(name) => self.get(scope, name.0).unwrap().clone(),
-            Syntax::Literal(literal) => match literal.0 .0 {
-                Token::String => Value::String(inner_string(self.source(literal.0))),
-                Token::Number => Value::Number(self.source(literal.0).parse::<usize>().unwrap()),
-                Token::Boolean => Value::Boolean(self.source(literal.0).parse::<bool>().unwrap()),
-                Token::None => Value::None,
-                _ => panic!(),
-            },
-            Syntax::Closure(closure) => {
-                let name = closure.name.clone();
-                let expression = closure.expression.clone();
-                let closure = move |value: Value, interpreter: &mut Interpreter| {
-                    let mut scope = Scope::new(scope);
-                    scope.map.insert(interpreter.source(name), value);
-                    interpreter.chain.push(scope);
-                    interpreter.eval(*expression.clone(), interpreter.chain.len() - 1)
-                };
-                Value::Closure(Arc::new(closure))
-            }
-            Syntax::Call(call) => {
-                let left = self.eval(*call.0, scope).unwrap_closure();
-                let right = self.eval(*call.1, scope);
-                left(right, self)
-            }
-            Syntax::Assignment(assignment) => {
-                let name = String::from(self.source(assignment.name));
-                let value = self.eval(*assignment.expression, scope);
-                self.map(scope).insert(name, value);
-                Value::None
-            }
+            Syntax::Name(name) => name.eval(self, scope),
+            Syntax::Literal(literal) => literal.eval(self),
+            Syntax::Closure(closure) => closure.eval(scope),
+            Syntax::Call(call) => call.eval(self, scope),
+            Syntax::Assignment(assignment) => assignment.eval(self, scope),
         }
     }
 }

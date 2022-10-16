@@ -1,4 +1,9 @@
-use crate::interpreter::r#type::Type;
+use crate::interpreter::{
+    self,
+    r#type::Type,
+    value::{inner_string, Value},
+    Interpreter,
+};
 
 use super::{Leaf, Token};
 
@@ -12,6 +17,16 @@ impl LiteralSyntax {
             Token::Number => Type::Number,
             Token::Boolean => Type::Boolean,
             Token::None => Type::None,
+            _ => panic!(),
+        }
+    }
+
+    pub fn eval(&self, interpreter: &mut Interpreter) -> Value {
+        match self.0 .0 {
+            Token::String => Value::String(inner_string(interpreter.source(self.0))),
+            Token::Number => Value::Number(interpreter.source(self.0).parse::<usize>().unwrap()),
+            Token::Boolean => Value::Boolean(interpreter.source(self.0).parse::<bool>().unwrap()),
+            Token::None => Value::None,
             _ => panic!(),
         }
     }
