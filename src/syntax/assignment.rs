@@ -40,6 +40,21 @@ impl AssignmentSyntax {
     pub fn bind(&self, interpreter: &mut Interpreter, scope: ScopeIndex) -> Type {
         let expression_type = interpreter.bind(*self.expression.clone(), scope);
 
+        if let Some(type_expression) = self.type_expression.clone() {
+            let name_type =
+                interpreter.bind(Syntax::TypeExpression(type_expression.clone()), scope);
+            if expression_type != name_type {
+                interpreter.error(Error::MismatchedTypeAssignment(
+                    interpreter.range(type_expression.name),
+                    interpreter.source(self.name),
+                    expression_type.clone(),
+                    name_type,
+                ));
+
+                return Type::None;
+            }
+        }
+
         if let Some(_) = interpreter.lookup(scope, self.name) {
             interpreter.error(Error::Reassignment(
                 interpreter.range(self.name),

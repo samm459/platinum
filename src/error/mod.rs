@@ -15,6 +15,7 @@ pub enum Error {
     Reassignment(Range<usize>, String),
     UnexpectedToken(Range<usize>, Token, Token),
     BadCall(Range<usize>),
+    MismatchedTypeAssignment(Range<usize>, String, Type, Type),
 }
 
 #[derive(Debug)]
@@ -76,6 +77,15 @@ impl Debug for Error {
                 Category::Type,
                 range.clone(),
                 String::from("Cannot call a non-closure value"),
+            ),
+            Self::MismatchedTypeAssignment(range, name, expression_type, name_type) => Error::log(
+                f,
+                Category::Type,
+                range.clone(),
+                format!(
+                    "Tried to assign expression of type {:?} to name \"{}\", which is of type {:?}",
+                    expression_type, name, name_type
+                ),
             ),
         }
     }

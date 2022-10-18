@@ -40,16 +40,17 @@ impl Repl {
 
         for line in io::stdin().lock().lines() {
             let line = line.unwrap();
-            source += &line;
 
-            if source == "#clear" {
+            if line == "#clear" {
                 Repl::clear();
                 continue;
             }
 
-            if source == "#exit" {
+            if line == "#exit" {
                 break;
             }
+
+            source += &line;
 
             let (syntax, syntax_errors) = parse(&source, position);
 

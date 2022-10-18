@@ -21,8 +21,8 @@ pub fn build() -> CoreLibrary {
 
 pub fn primitives() -> Primatives {
     primitives![
-        ("string".into(), Type::String),
-        ("number".into(), Type::Number),
-        ("boolean".into(), Type::Boolean)
+        ("String".into(), Type::String),
+        ("Number".into(), Type::Number),
+        ("Boolean".into(), Type::Boolean)
     ]
 }

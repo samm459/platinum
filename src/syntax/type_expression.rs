@@ -4,8 +4,8 @@ use super::{Node, Parser, Token};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct TypeExpressionSyntax {
-    colon: Node,
-    name: Node,
+    pub colon: Node,
+    pub name: Node,
 }
 
 impl TypeExpressionSyntax {
