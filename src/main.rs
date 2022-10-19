@@ -1,13 +1,16 @@
 #![feature(box_syntax)]
+#![feature(never_type)]
+#![feature(backtrace)]
 
 pub mod core;
+pub mod editor;
 pub mod error;
 pub mod interpreter;
-pub mod repl;
 pub mod syntax;
 
-use repl::Repl;
+use editor::Editor;
 
 fn main() {
-    Repl::start();
+    let mut editor = Editor::new();
+    editor.start().unwrap();
 }

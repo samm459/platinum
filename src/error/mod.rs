@@ -3,8 +3,8 @@ use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::ops::Range;
 
+use crate::editor::escape_code::*;
 use crate::interpreter::r#type::*;
-use crate::repl::escape_code::*;
 use crate::syntax::*;
 
 #[derive(Clone)]
@@ -36,6 +36,19 @@ impl Error {
             "{}{:?} Error: {}{}{}\n    at range {}..{}{}",
             RED, category, message, RESET, DIM, range.start, range.end, RESET
         )
+    }
+
+    pub fn is_unexpected_end_of_file(&self) -> bool {
+        match self {
+            Error::UnexpectedToken(_, _, token) => {
+                if token == &Token::EndOfFile {
+                    true
+                } else {
+                    false
+                }
+            }
+            _ => false,
+        }
     }
 }
 

@@ -2,6 +2,8 @@ mod character;
 mod keyword;
 mod lexer;
 
+use crossterm::style::Stylize;
+
 use self::character::*;
 use self::keyword::*;
 
@@ -52,8 +54,8 @@ pub fn tokenize(source: &str, start: usize) -> Lexer {
 
 impl Token {
     pub fn identifier(lexer: &mut Lexer) {
-        if lexer.current().is_alphabetic() {
-            while lexer.current().is_alphanumeric() {
+        if lexer.current().is_alphabetic() || lexer.current() == UNDERSCORE {
+            while lexer.current().is_alphanumeric() || lexer.current() == UNDERSCORE {
                 lexer.step()
             }
         }
@@ -114,8 +116,9 @@ impl Token {
     }
 
     pub fn lambda(lexer: &mut Lexer) {
-        if lexer.current() == LAMBDA {
-            lexer.step()
+        if lexer.current() == GT && lexer.peek(1) == GT {
+            lexer.step();
+            lexer.step();
         }
 
         lexer.add(Token::Lambda)

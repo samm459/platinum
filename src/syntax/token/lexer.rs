@@ -61,6 +61,13 @@ impl Lexer {
         }
     }
 
+    pub fn peek(&self, ahead: usize) -> char {
+        match self.chars().get(self.position + ahead + self.reach) {
+            Some(char) => *char,
+            None => TERMINATOR,
+        }
+    }
+
     pub fn span(&self) -> String {
         match self.chars().get(self.position..self.position + self.reach) {
             Some(slice) => slice.iter().collect(),

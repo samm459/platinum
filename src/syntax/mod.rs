@@ -36,8 +36,7 @@ impl Syntax {
                 type_expression,
                 parser,
             )),
-            Token::Lambda => Syntax::Closure(ClosureSyntax::parse(name, type_expression, parser)),
-            _ => panic!(),
+            _ => Syntax::Closure(ClosureSyntax::parse(name, type_expression, parser)),
         }
     }
 

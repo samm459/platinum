@@ -45,7 +45,7 @@ impl ClosureSyntax {
         ClosureSyntax {
             name,
             type_expression,
-            lambda: parser.assert(Token::Lambda),
+            lambda: parser.expect(Token::Lambda),
             expression: Box::new(Syntax::parse(parser)),
         }
     }
